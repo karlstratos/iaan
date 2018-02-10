@@ -1,3 +1,13 @@
+# tmp folder
+tmp/*
+
+# Data
+data/pos/*
+data/ner/*
+!data/pos/sample*
+!data/ner/sample*
+!data/ner/convert_bio.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
