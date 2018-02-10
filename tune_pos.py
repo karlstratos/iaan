@@ -18,7 +18,7 @@ def get_model_path(path, lrate, drate):
 
 def f((mem, seed, autobatch, model_path, data, gold, arch, zsize, wdim, cdim,
        jdim, lrate, drate, epochs, batch, width, swap, emb, loss_type)):
-    cmd = "python pos.py "
+    cmd = "python run_pos.py "
     cmd += "--dynet-mem {0} ".format(mem)
     cmd += "--dynet-seed {0} ".format(seed)
     cmd += "--dynet-autobatch {0} ".format(autobatch)

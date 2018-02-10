@@ -18,7 +18,7 @@ def get_model_path(path, lrate, batch):
 
 def f((mem, seed, autobatch, model_path, data, dev, arch, zsize, wdim, cdim,
        lrate, drate, epochs, batch, width, swap, emb, loss_type)):
-    cmd = "python2.7 ner.py "
+    cmd = "python2.7 run_ner.py "
     cmd += "--dynet-mem {0} ".format(mem)
     cmd += "--dynet-seed {0} ".format(seed)
     cmd += "--dynet-autobatch {0} ".format(autobatch)
