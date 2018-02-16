@@ -1,6 +1,6 @@
 # Author: Karl Stratos (me@karlstratos.com)
 #
-# python2.7 tune_ner.py /scratch/scratch/ner_conll2003_dev_default_lb_zsize4_wdim100_cdim50_width2_drate0_epochs10 data/ner/conll2003/conll2003.train.words data/ner/conll2003/conll2003.dev.words --arch default --loss lb --zsize 4 --wdim 100 --cdim 50 --width 2 --drate 0 --epochs 10
+# python tune_ner.py /scratch/scratch/ner_conll2003_dev_default_lb_zsize4_wdim100_cdim50_width2_drate0_epochs10 data/ner/conll2003/conll2003.train.words data/ner/conll2003/conll2003.dev.words --arch default --loss lb --zsize 4 --wdim 100 --cdim 50 --width 2 --drate 0 --epochs 10
 import argparse
 import os
 import re
@@ -18,7 +18,7 @@ def get_model_path(path, lrate, batch):
 
 def f((mem, seed, autobatch, model_path, data, dev, arch, zsize, wdim, cdim,
        lrate, drate, epochs, batch, width, swap, emb, loss_type)):
-    cmd = "python2.7 run_ner.py "
+    cmd = "python run_ner.py "
     cmd += "--dynet-mem {0} ".format(mem)
     cmd += "--dynet-seed {0} ".format(seed)
     cmd += "--dynet-autobatch {0} ".format(autobatch)
