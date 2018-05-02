@@ -14,7 +14,7 @@ def main(args):
     if args.train:
         model.config(args.arch, args.loss, args.zsize, args.wdim,
                      args.cdim, args.jdim, args.width, args.swap, args.smooth,
-                     args.verbose)
+                     args.metric, args.verbose)
         model.train(args.model, wseqs, args.lrate, args.drate, args.epochs,
                     args.batch, args.emb, tseqs)
 
@@ -27,7 +27,8 @@ def main(args):
         model._verbose = True
         model.common.evaluator_report(wseqs, tseqs, zseqs_X, zseqs_Y,
                                       zseqs_XY, infer_time,
-                                      model.measure_mi(wseqs), newline=True)
+                                      model.measure_mi(wseqs), args.metric,
+                                      newline=True)
         if args.pred:
             with codecs.open(args.pred, 'w', "utf-8") as outf:
                 for i in xrange(len(wseqs)):
@@ -79,6 +80,8 @@ if __name__ == "__main__":
                            help="number of training epochs: %(default)d")
     argparser.add_argument("--batch", type=int, default=0,
                            help="batch size (0 if sentence): %(default)d")
+    argparser.add_argument("--metric", type=str, default="m2o",
+                           help="evaluation metric")
     argparser.add_argument("--pred", type=str,
                            help="prediction output file")
     argparser.add_argument("--verbose", action="store_true",

@@ -192,7 +192,7 @@ class NamedEntityInducer(Model):
                     wseqs_dev, spanseqs_dev)
                 acc_max = self.common.evaluator_report(
                     wseqs_dev, entityseqs_dev, zseqs_X, zseqs_Y, zseqs_XY,
-                    infer_time, self.measure_mi(wseqs, spanseqs))
+                    infer_time, self.measure_mi(wseqs, spanseqs), "m2o")
                 self.common.turn_on_training(drate)
                 if acc_max > acc_best:
                     acc_best = acc_max

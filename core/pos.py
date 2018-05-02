@@ -17,7 +17,7 @@ class PartOfSpeechInducer(Model):
         super(PartOfSpeechInducer, self).__init__(cmd)
 
     def config(self, arch, loss_type, zsize, wdim, cdim, jdim, width, swap,
-               pseudocount, verbose=False):
+               pseudocount, metric, verbose=False):
         self.arch = arch
         self.loss_type = loss_type
         self.zsize = zsize
@@ -27,6 +27,7 @@ class PartOfSpeechInducer(Model):
         self.width = width
         self.swap = swap
         self.pseudocount = pseudocount
+        self.metric = metric
         self._verbose = verbose
 
     def init_parameters(self, wembs):
@@ -269,7 +270,7 @@ class PartOfSpeechInducer(Model):
         self._train_report(lrate, drate, epochs, batch_size)
         self.common.turn_on_training(drate)
 
-        acc_best = 0.0
+        perf_best = 0.0
         for epoch in xrange(epochs):
             self._log("Epoch {0:2d}  ".format(epoch + 1), False)
             epoch_start_time = time.time()
@@ -291,14 +292,15 @@ class PartOfSpeechInducer(Model):
             if tseqs:
                 self.common.turn_off_training()
                 zseqs_X, zseqs_Y, zseqs_XY, infer_time = self.tag_all(wseqs)
-                acc_max = self.common.evaluator_report(wseqs, tseqs, zseqs_X,
-                                                       zseqs_Y, zseqs_XY,
-                                                       infer_time,
-                                                       self.measure_mi(wseqs))
+                perf_max = self.common.evaluator_report(wseqs, tseqs, zseqs_X,
+                                                        zseqs_Y, zseqs_XY,
+                                                        infer_time,
+                                                        self.measure_mi(wseqs),
+                                                        self.metric)
                 self.common.turn_on_training(drate)
-                if acc_max > acc_best:
-                    acc_best = acc_max
-                    self._log("new best {0:.2f} - saving  ".format(acc_best),
+                if perf_max > perf_best:
+                    perf_best = perf_max
+                    self._log("new best {0:.2f} - saving  ".format(perf_best),
                               False)
                     self.save(model_path)
             else:

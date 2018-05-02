@@ -127,21 +127,30 @@ class CommonArchitecture(object):
         return loss
 
     def evaluator_report(self, wseqs, tseqs, zseqs_X, zseqs_Y, zseqs_XY,
-                         infer_time, mi_value, newline=False):
+                         infer_time, mi_value, metric, newline=False):
         model = self.model
-        acc_X = model.evaluator.compute_many2one_acc(tseqs, zseqs_X)
-        acc_Y = model.evaluator.compute_many2one_acc(tseqs, zseqs_Y)
-        acc_XY = model.evaluator.compute_many2one_acc(tseqs, zseqs_XY) \
-                 if zseqs_XY else float("-inf")
+        if metric == "m2o":
+            perf_X = model.evaluator.compute_many2one_acc(tseqs, zseqs_X)
+            perf_Y = model.evaluator.compute_many2one_acc(tseqs, zseqs_Y)
+            perf_XY = model.evaluator.compute_many2one_acc(tseqs, zseqs_XY) \
+                     if zseqs_XY else float("-inf")
+        elif metric == "vm":
+            perf_X = model.evaluator.compute_v_measure(tseqs, zseqs_X)
+            perf_Y = model.evaluator.compute_v_measure(tseqs, zseqs_Y)
+            perf_XY = model.evaluator.compute_v_measure(tseqs, zseqs_XY) \
+                     if zseqs_XY else float("-inf")
+        else:
+            raise ValueError("unknown metric: {0}".format(metric))
 
         model._log("MI: {0:.2f}  ".format(mi_value), False)
-        model._log("X acc: {0:.2f}  ".format(acc_X), False)
-        model._log("Y acc: {0:.2f}  ".format(acc_Y), False)
-        if acc_XY > -1: model._log("XY acc: {0:.2f}  ".format(acc_XY), False)
+        model._log("metric: {0}  ".format(metric), False)
+        model._log("X perf: {0:.2f}  ".format(perf_X), False)
+        model._log("Y perf: {0:.2f}  ".format(perf_Y), False)
+        if perf_XY > -1: model._log("XY perf: {0:.2f}  ".format(perf_XY), False)
         model._log("({0:.1f}s)  ".format(infer_time), False)
 
         if newline: model._log("")
-        return max([acc_X, acc_Y, acc_XY])
+        return max([perf_X, perf_Y, perf_XY])
 
     def run_lstm(self, inputs, lstm, reverse=False):
         s = lstm.initial_state()

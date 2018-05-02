@@ -30,7 +30,7 @@ def main(args):
         model._verbose = True
         model.common.evaluator_report(wseqs, entityseqs, zseqs_X, zseqs_Y,
                                       zseqs_XY, infer_time,
-                                      model.measure_mi(wseqs, spanseqs),
+                                      model.measure_mi(wseqs, spanseqs), "m2o",
                                       newline=True)
         if args.pred:
             with codecs.open(args.pred, 'w', "utf-8") as outf:

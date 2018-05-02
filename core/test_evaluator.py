@@ -26,6 +26,11 @@ class TestEvaluator(unittest.TestCase):
         self.assertEqual(self.evaluator.compute_many2one_acc(self.tseqs,
                                                              self.zseqs), 60.0)
 
+    def test_compute_v_measure(self):
+        print self.evaluator.compute_v_measure(self.tseqs, self.zseqs)
+        self.assertAlmostEqual(self.evaluator.compute_v_measure(
+            self.tseqs, self.zseqs), 0.46336, places=5)
+
     def test_mi_zero(self):
         info = InformationTheory()  # Assumes the correctness of info.mi(joint).
         joint = info.rand_joint(10, 20)

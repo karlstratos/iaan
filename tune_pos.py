@@ -17,7 +17,7 @@ def get_model_path(path, lrate, drate):
     return model_path
 
 def f((mem, seed, autobatch, model_path, data, gold, arch, zsize, wdim, cdim,
-       jdim, lrate, drate, epochs, batch, width, swap, emb, loss_type)):
+       jdim, lrate, drate, epochs, batch, metric, width, swap, emb, loss_type)):
     cmd = "python run_pos.py "
     cmd += "--dynet-mem {0} ".format(mem)
     cmd += "--dynet-seed {0} ".format(seed)
@@ -35,6 +35,7 @@ def f((mem, seed, autobatch, model_path, data, gold, arch, zsize, wdim, cdim,
     cmd += "--drate {0} ".format(drate)
     cmd += "--epochs {0} ".format(epochs)
     cmd += "--batch {0} ".format(batch)
+    cmd += "--metric {0} ".format(metric)
     cmd += "--width {0} ".format(width)
     if swap: cmd += "--swap "
     if emb: cmd += "--emb {0} ".format(emb)
@@ -73,8 +74,8 @@ def main(args):
                             args.dynet_autobatch, model_path, args.data,
                             args.gold, args.arch, args.zsize,
                             args.wdim, args.cdim, args.jdim, lrate, drate,
-                            args.epochs, args.batch, args.width, args.swap,
-                            args.emb, args.loss))
+                            args.epochs, args.batch, args.metric, args.width,
+                            args.swap, args.emb, args.loss))
     p.map(f, configs)
 
     results = {}
@@ -149,6 +150,8 @@ if __name__ == "__main__":
                            help="number of training epochs: %(default)d")
     argparser.add_argument("--batch", type=int, default=0,
                            help="batch size (0 if sentence): %(default)d")
+    argparser.add_argument("--metric", type=str, default="m2o",
+                           help="evaluation metric")
     argparser.add_argument("--verbose", action="store_true",
                            help="print?")
     argparser.add_argument("--dynet-mem", type=int, default=512)
