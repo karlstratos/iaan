@@ -368,6 +368,7 @@ class PartOfSpeechInducer(Model):
         self._log("  drate:              {0}".format(drate))
         self._log("  epochs:             {0}".format(epochs))
         self._log("  batch size:         {0}".format(batch_size))
+        self._log("  metric:             {0}".format(self.metric))
         self._log("")
 
     def tag(self, wseq):
