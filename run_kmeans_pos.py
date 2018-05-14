@@ -20,7 +20,7 @@ class PartOfSpeechKMeans(Model):
         self.zsize = zsize
         self._verbose = verbose
 
-    def train(self, wseqs, wemb_path, tseqs):
+    def train(self, wseqs, wemb_path, tseqs, seed):
         wdict = {}
         for wseq in wseqs:
             for w in wseq: wdict[w] = True
@@ -39,7 +39,7 @@ class PartOfSpeechKMeans(Model):
         print "-----------------"
         print "Clustering {0} words into {1} groups".format(len(X), self.zsize)
         X = np.array(X)
-        kmeans = KMeans(n_clusters=self.zsize, random_state=0).fit(X)
+        kmeans = KMeans(n_clusters=self.zsize, random_state=seed).fit(X)
         print "-----------------"
         predmap = kmeans.predict(X)
         pseqs = []
@@ -51,14 +51,14 @@ class PartOfSpeechKMeans(Model):
         acc = self.evaluator.compute_many2one_acc(tseqs, pseqs)
         print "Accuracy: {0:.2f}".format(acc)
 
-        c2w = {}
-        for i, c in enumerate(predmap):
-            if not c in c2w: c2w[c] = []
-            c2w[c].append(i2w[i])
-        for c in c2w:
-            print c
-            print c2w[c]
-            print
+        #c2w = {}
+        #for i, c in enumerate(predmap):
+        #    if not c in c2w: c2w[c] = []
+        #    c2w[c].append(i2w[i])
+        #for c in c2w:
+        #    print c
+        #    print c2w[c]
+        #    print
 
 
 def main(args):
@@ -67,7 +67,7 @@ def main(args):
     wseqs, tseqs = model.read_wseqs(args.data, args.gold)
 
     model.config(args.zsize, args.verbose)
-    model.train(wseqs, args.emb, tseqs)
+    model.train(wseqs, args.emb, tseqs, args.seed)
 
 
 if __name__ == "__main__":
@@ -82,6 +82,8 @@ if __name__ == "__main__":
                            help="path to pretrained word embeddings")
     argparser.add_argument("--pred", type=str,
                            help="prediction output file")
+    argparser.add_argument("--seed", type=int, default=42,
+                           help="random seed: %(default)d")
     argparser.add_argument("--verbose", action="store_true",
                            help="print?")
 
