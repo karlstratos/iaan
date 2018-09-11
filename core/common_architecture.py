@@ -43,40 +43,44 @@ class CommonArchitecture(object):
 
         return crep_dim
 
-    def get_wemb(self, w):
+    def get_wemb(self, w, update_flag=True):
         model = self.model
         if model.wdim == 0: return None
-        return dy.lookup(model.wlook, model.get_w_ind(w))
+        return dy.lookup(model.wlook, model.get_w_ind(w), update=update_flag)
 
-    def get_cemb(self, c):
+    def get_cemb(self, c, update_flag=True):
         model = self.model
         if model.cdim == 0: return None
-        return dy.lookup(model.clook, model.get_c_ind(c))
+        return dy.lookup(model.clook, model.get_c_ind(c), update=update_flag)
 
-    def get_jamo_rep(self, char):
+    def get_jamo_rep(self, char, update_flag=True):
         model = self.model
         if model.jdim == 0: return None
 
         jamos = h2j(char)
         if len(jamos) == 1:  # Non-Hangul (ex: @, Q)
-            return dy.lookup(model.jlook, model.get_jamo_ind(jamos[0]))
+            return dy.lookup(model.jlook, model.get_jamo_ind(jamos[0]),
+                             update=update_flag)
 
         jamos_concat = dy.concatenate([
             dy.lookup(model.jlook, model.get_jamo_ind(jamos[0])),
             dy.lookup(model.jlook, model.get_jamo_ind(jamos[1])),
             dy.lookup(model.jlook, model.get_jamo_ind(jamos[2])) if \
             len(jamos) > 2 else dy.lookup(model.jlook,
-                                          model._jamo2i[model._EMP])])
+                                          model._jamo2i[model._EMP],
+                                          update=update_flag)])
         return self.activate(model.jamo_W * jamos_concat +
                              model.jamo_b)
 
-    def get_crep(self, chars):
+    def get_crep(self, chars, update_flag=True):
         model = self.model
         if model.cdim == 0 and model.jdim == 0: return None
-        inputs = [dy.concatenate([v for v in [self.get_cemb(c),
-                                              self.get_jamo_rep(c)] if v])
+        inputs = [dy.concatenate([v for v in [self.get_cemb(c, update_flag),
+                                              self.get_jamo_rep(c, update_flag)]
+                                  if v])
                   for c in chars]
-        return self.get_bilstm_single(inputs, model.clstm1, model.clstm2)
+        return self.get_bilstm_single(inputs, model.clstm1, model.clstm2,
+                                      update_flag)
 
     def estimate_joint_priors(self, qp_pairs, smooth=False):
         model = self.model
@@ -152,26 +156,28 @@ class CommonArchitecture(object):
         if newline: model._log("")
         return max([perf_X, perf_Y, perf_XY])
 
-    def run_lstm(self, inputs, lstm, reverse=False):
-        s = lstm.initial_state()
-        return s.transduce(inputs[::-1]) if reverse else s.transduce(inputs)
+    def run_lstm(self, inputs, lstm, update_flag=True):
+        s = lstm.initial_state(update=update_flag)
+        return s.transduce(inputs)
 
-    def run_bilstm(self, inputs, lstm1, lstm2):        #  1     2     3
-        outputs1 = self.run_lstm(inputs, lstm1)        # f1 -> f2 -> f3
-        outputs2 = self.run_lstm(inputs[::-1], lstm2)  # b3 -> b2 -> b1
+    def run_bilstm(self, inputs, lstm1, lstm2, update_flag=True):
+        outputs1 = self.run_lstm(inputs, lstm1, update_flag)  # f1 -> f2 -> f3
+        outputs2 = self.run_lstm(inputs[::-1], lstm2,         # b3 -> b2 -> b1
+                                 update_flag)
         return outputs1, outputs2[::-1]                # [f1 f2 f3], [b1 b2 b3]
 
-    def get_bilstm_all(self, inputs, lstm1, lstm2):
-        outputs1, outputs2 = self.run_bilstm(inputs, lstm1, lstm2)
+    def get_bilstm_all(self, inputs, lstm1, lstm2, update_flag=True):
+        outputs1, outputs2 = self.run_bilstm(inputs, lstm1, lstm2, update_flag)
         return [dy.concatenate([outputs1[i], outputs2[i]]) for
                 i in xrange(len(outputs1))]
 
-    def get_bilstm_single(self, inputs, lstm1, lstm2):
-        outputs1, outputs2 = self.run_bilstm(inputs, lstm1, lstm2)
+    def get_bilstm_single(self, inputs, lstm1, lstm2, update_flag=True):
+        outputs1, outputs2 = self.run_bilstm(inputs, lstm1, lstm2, update_flag)
         return dy.concatenate([outputs1[-1], outputs2[0]])
 
-    def get_bilstm_left_right(self, inputs, lstm1, lstm2, start, end):
-        outputs1, outputs2 = self.run_bilstm(inputs, lstm1, lstm2)
+    def get_bilstm_left_right(self, inputs, lstm1, lstm2, start, end,
+                              update_flag=True):
+        outputs1, outputs2 = self.run_bilstm(inputs, lstm1, lstm2, update_flag)
         return self.get_bilstm_left_right_from_outputs(outputs1, outputs2,
                                                        start, end)
 

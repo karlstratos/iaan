@@ -109,14 +109,47 @@ class TestCommonArchitecture(unittest.TestCase):
             self.assertAlmostEqual(subject1[i].value(), outputs1[i].value(),
                                    places=5)
 
-        s1_reverse = self.lstm1.initial_state()
-        outputs1_reverse = s1.transduce(self.inputs_reverse)
-        subject1_reverse = self.common.run_lstm(self.inputs, self.lstm1,
-                                                reverse=True)
-        for i in xrange(len(outputs1_reverse)):
-            self.assertAlmostEqual(subject1_reverse[i].value(),
-                                   outputs1_reverse[i].value(),
-                                   places=5)
+    def test_get_bilstm_all_update(self):
+        pc = dy.ParameterCollection()
+        trainer = dy.AdamTrainer(pc, 0.1)
+        flstm = dy.LSTMBuilder(1, 1, 1, pc)
+        blstm = dy.LSTMBuilder(1, 1, 1, pc)
+        model = Model()
+        common = CommonArchitecture(model)
+
+        def make_inputs():
+            return [dy.inputTensor([1.0]), dy.inputTensor([2.0]),
+                    dy.inputTensor([3.0]), dy.inputTensor([4.0])]
+
+        def test(sqnorm_original_value, assert_equal):
+            dy.renew_cg()
+            inputs = make_inputs()
+            avg = dy.average(common.get_bilstm_all(inputs, flstm, blstm))
+            sqnorm = dy.squared_norm(avg)
+            if assert_equal:
+                self.assertAlmostEqual(sqnorm_original_value, sqnorm.value(),
+                                       places=10)
+            else:
+                self.assertNotAlmostEqual(sqnorm_original_value, sqnorm.value(),
+                                          places=10)
+
+        inputs = make_inputs()
+        avg = dy.average(common.get_bilstm_all(inputs, flstm, blstm, False))
+        sqnorm = dy.squared_norm(avg)
+        sqnorm_original_value = sqnorm.value()
+        sqnorm.backward()
+        trainer.update()  # Shouldn't update LSTMs.
+
+        test(sqnorm_original_value, True)
+
+        dy.renew_cg()
+        inputs = make_inputs()
+        avg = dy.average(common.get_bilstm_all(inputs, flstm, blstm))
+        sqnorm = dy.squared_norm(avg)
+        sqnorm.backward()
+        trainer.update()  # Should update LSTMs.
+
+        test(sqnorm_original_value, False)
 
 
 if __name__ == '__main__':
