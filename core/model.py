@@ -1,4 +1,5 @@
 # Author: Karl Stratos (me@karlstratos.com)
+import nltk
 import os
 import random
 import sys
@@ -91,6 +92,14 @@ class Model(object):
             with open(self._log_path, 'a') as logf:
                 logf.write(string)
                 if newline: logf.write('\n')
+
+    def read_articles(self, articles_path):
+        articles = []
+        with open(articles_path, 'r') as articles_file:
+            for line in articles_file:
+                sents = nltk.sent_tokenize(line)
+                articles.append([sent.split() for sent in sents])
+        return articles
 
     def read_wseqs(self, wseq_path, tag_path=""):
         with open(wseq_path, 'r') as wseq_file:
