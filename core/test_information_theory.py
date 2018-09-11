@@ -8,6 +8,20 @@ class TestInformationTheory(unittest.TestCase):
     def setUp(self):
         self.info = InformationTheory()
 
+    def test_cross_entropy_structbag(self):
+        P = dy.inputTensor([[0.5, 0.5],
+                            [0.5, 0.5],
+                            [0.5, 0.5],
+                            [0.5, 0.5],
+                            [0.5, 0.5]])
+        Q = dy.inputTensor([[0.5, 0.5],
+                            [0.5, 0.5],
+                            [0.5, 0.5],
+                            [0.5, 0.5],
+                            [0.5, 0.5]])
+        entropy_unif = self.info.cross_entropy_structbag(P, Q)
+        self.assertAlmostEqual(entropy_unif.value(), 5.0, places=10)
+
     def test_entropy(self):
         entropy_hot = self.info.entropy(dy.inputTensor([0.9999999,
                                                         0.0000001 / 3.0,

@@ -8,6 +8,14 @@ class InformationTheory(object):
     """
     Methods that handle zero probability call value(), so they can't be batched.
     """
+    def cross_entropy_structbag(self, P, Q):
+        """
+        P (K x m) represents a distribution over STRUCTURED labels where each
+        label is a BAG of K INDEPENDENT symbols taking values in {1 ... m}.
+        That is, z = (z1 ... zK) is assigned probability P1(z1) * ... * PK(zK).
+        (Similarly for Q.) By the independence, H(P, Q) = sum_k H(Pk, Qk).
+        """
+        return - dy.sum_dim(dy.cmult(P, self.log2(Q)), [0, 1])
 
     def cross_entropy(self, p, q):
         return - dy.sum_elems(dy.cmult(p, self.log2(q)))
