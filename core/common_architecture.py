@@ -67,8 +67,8 @@ class CommonArchitecture(object):
             dy.lookup(model.jlook, model.get_jamo_ind(jamos[2])) if \
             len(jamos) > 2 else dy.lookup(model.jlook,
                                           model._jamo2i[model._EMP])])
-        return self.activate(model.jamo_W.expr() * jamos_concat +
-                             model.jamo_b.expr())
+        return self.activate(model.jamo_W * jamos_concat +
+                             model.jamo_b)
 
     def get_crep(self, chars):
         model = self.model

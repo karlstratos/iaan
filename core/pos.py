@@ -120,11 +120,11 @@ class PartOfSpeechInducer(Model):
         window = Window(wseq, self._BUF)
         X = window.left(j, self.width) + window.right(j, self.width)
         v_X = [self.common.get_wemb(w) for w in X]
-        qZ_X = dy.softmax(self.W_X.expr() * dy.concatenate(v_X))
+        qZ_X = dy.softmax(self.W_X * dy.concatenate(v_X))
 
         v_Y = [v for v in [self.common.get_wemb(wseq[j]),
                            self.common.get_crep(wseq[j])] if v]
-        pZ_Y = dy.softmax(self.W_Y.expr() * dy.concatenate(v_Y))
+        pZ_Y = dy.softmax(self.W_Y * dy.concatenate(v_Y))
 
         return qZ_X, pZ_Y
 
@@ -132,10 +132,10 @@ class PartOfSpeechInducer(Model):
         window = Window(wseq, self._BUF)
         X = window.left(j, self.width) + window.right(j, self.width)
         v_X = [self.common.get_crep(w) for w in X]
-        qZ_X = dy.softmax(self.W_X.expr() * dy.concatenate(v_X))
+        qZ_X = dy.softmax(self.W_X * dy.concatenate(v_X))
 
         v_Y = [self.common.get_crep(wseq[j])]
-        pZ_Y = dy.softmax(self.W_Y.expr() * dy.concatenate(v_Y))
+        pZ_Y = dy.softmax(self.W_Y * dy.concatenate(v_Y))
 
         return qZ_X, pZ_Y
 
@@ -143,11 +143,11 @@ class PartOfSpeechInducer(Model):
         window = Window(wseq, self._BUF)
         X = window.left(j, 1)
         v_X = [self.common.get_wemb(w) for w in X]
-        qZ_X = dy.softmax(self.W.expr() * dy.concatenate(v_X))
+        qZ_X = dy.softmax(self.W * dy.concatenate(v_X))
 
         Y = [wseq[j]]
         v_Y = [self.common.get_wemb(w) for w in Y]
-        pZ_Y = dy.softmax(self.W.expr() * dy.concatenate(v_Y))
+        pZ_Y = dy.softmax(self.W * dy.concatenate(v_Y))
 
         return qZ_X, pZ_Y
 
@@ -155,11 +155,11 @@ class PartOfSpeechInducer(Model):
         window = Window(wseq, self._BUF)
         X = window.left(j, 1)
         v_X = [self.common.get_wemb(w) for w in X]
-        qZ_X = dy.softmax(self.W_X.expr() * dy.concatenate(v_X))
+        qZ_X = dy.softmax(self.W_X * dy.concatenate(v_X))
 
         Y = [wseq[j]]
         v_Y = [self.common.get_wemb(w) for w in Y]
-        pZ_Y = dy.softmax(self.W_Y.expr() * dy.concatenate(v_Y))
+        pZ_Y = dy.softmax(self.W_Y * dy.concatenate(v_Y))
 
         return qZ_X, pZ_Y
 
@@ -168,13 +168,13 @@ class PartOfSpeechInducer(Model):
         X = window.left(max(0, j - 1), self.width)
         X += window.right(j, self.width)
         v_X = [self.common.get_wemb(w) for w in X]
-        qZ_X = dy.softmax(self.W_X.expr() * dy.concatenate(v_X))
+        qZ_X = dy.softmax(self.W_X * dy.concatenate(v_X))
 
         Y = window.left(j, 1)
         Y += [wseq[j]]
         v_Y = [v for v in [self.common.get_wemb(w) for w in Y] +
                [self.common.get_crep(wseq[j])] if v]
-        pZ_Y = dy.softmax(self.W_Y.expr() * dy.concatenate(v_Y))
+        pZ_Y = dy.softmax(self.W_Y * dy.concatenate(v_Y))
 
         return qZ_X, pZ_Y
 
@@ -183,14 +183,14 @@ class PartOfSpeechInducer(Model):
         X = window.left(max(0, j - 1), self.width)
         X += window.right(min(len(wseq) - 1, j + 1), self.width)
         v_X = [self.common.get_wemb(w) for w in X]
-        qZ_X = dy.softmax(self.W_X.expr() * dy.concatenate(v_X))
+        qZ_X = dy.softmax(self.W_X * dy.concatenate(v_X))
 
         Y = window.left(j, 1)
         Y += [wseq[j]]
         Y += window.right(j, 1)
         v_Y = [v for v in [self.common.get_wemb(w) for w in Y] +
                [self.common.get_crep(wseq[j])] if v]
-        pZ_Y = dy.softmax(self.W_Y.expr() * dy.concatenate(v_Y))
+        pZ_Y = dy.softmax(self.W_Y * dy.concatenate(v_Y))
 
         return qZ_X, pZ_Y
 
@@ -207,10 +207,10 @@ class PartOfSpeechInducer(Model):
             v_X = self.common.get_bilstm_left_right_from_outputs(outputs1,
                                                                  outputs2,
                                                                  j + 1, j + 1)
-            qZ_X = dy.softmax(self.W_X.expr() * v_X)
+            qZ_X = dy.softmax(self.W_X * v_X)
             v_Y = [v for v in [self.common.get_wemb(wseq[j]),
                                self.common.get_crep(wseq[j])] if v]
-            pZ_Y = dy.softmax(self.W_Y.expr() * dy.concatenate(v_Y))
+            pZ_Y = dy.softmax(self.W_Y * dy.concatenate(v_Y))
             qp_pairs.append((qZ_X, pZ_Y))
 
         return qp_pairs

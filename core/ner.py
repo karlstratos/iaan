@@ -81,10 +81,10 @@ class NamedEntityInducer(Model):
         window = Window(wseq, self._BUF)
         X = window.left(s, self.width) + window.right(t, self.width)
         v_X = [self.common.get_wemb(w) for w in X]
-        qZ_X = dy.softmax(self.W_X.expr() * dy.concatenate(v_X))
+        qZ_X = dy.softmax(self.W_X * dy.concatenate(v_X))
 
         v_Y = self.get_spanrep(wseq, (s, t))
-        pZ_Y = dy.softmax(self.W_Y.expr() * v_Y)
+        pZ_Y = dy.softmax(self.W_Y * v_Y)
 
         return qZ_X, pZ_Y
 
@@ -99,9 +99,9 @@ class NamedEntityInducer(Model):
         v_X = self.common.get_bilstm_left_right_from_outputs(outputs1,
                                                              outputs2,
                                                              s + 1, t + 1)
-        qZ_X = dy.softmax(self.W_X.expr() * v_X)
+        qZ_X = dy.softmax(self.W_X * v_X)
         v_Y = self.get_spanrep(wseq, (s, t))
-        pZ_Y = dy.softmax(self.W_Y.expr() * v_Y)
+        pZ_Y = dy.softmax(self.W_Y * v_Y)
 
         return qZ_X, pZ_Y
 
