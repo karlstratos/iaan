@@ -86,6 +86,7 @@ if __name__ == "__main__":
                            help="prediction output file")
     argparser.add_argument("--verbose", action="store_true",
                            help="print?")
+    argparser.add_argument("--dynet-gpu", action="store_true")      # cmd
     argparser.add_argument("--dynet-mem", type=int, default=512)      # cmd
     argparser.add_argument("--dynet-seed", type=int, default=42)      # cmd
     argparser.add_argument("--dynet-autobatch", type=int, default=1)  # cmd

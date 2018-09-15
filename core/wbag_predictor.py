@@ -4,6 +4,7 @@ import numpy as np
 import os
 import pickle
 import random
+import sys
 import time
 from common_architecture import CommonArchitecture
 from information_theory import InformationTheory
@@ -24,7 +25,7 @@ class WBagPredictor(Model):
         self._verbose = verbose
 
     def init_parameters(self, wembs={}):
-        self.common.init_common_parameters(wembs)  # Only (shared) word embs
+        self.common.init_common_parameters(wembs)  # Only word embs
 
         if self.arch == "wbag":
             self.U = self.m.add_parameters((len(self._w2i), self.wdim))
@@ -59,11 +60,13 @@ class WBagPredictor(Model):
                         for sent in article_X]
         rep = self.get_article_rep(input_seqs_X)
         on_probs = dy.logistic(rep)
+
+        answers_numpy = np.zeros(len(self._w2i))
         present = {self._w2i[w]: True for sent in article_Y for w in sent}
-        losses = [dy.binary_log_loss(dy.pick(on_probs, i), dy.scalarInput(1)
-                                     if i in present else dy.scalarInput(0))
-                  for i in xrange(len(self._w2i))]
-        return dy.average(losses)
+        for i in present: answers_numpy[i] = 1.0
+        answers = dy.inputTensor(answers_numpy)
+        loss = dy.binary_log_loss(on_probs, answers)
+        return loss
 
     def test(self, articles_X, articles_Y):
         avg_xent = 0.0
@@ -77,8 +80,10 @@ class WBagPredictor(Model):
             on_lprobs = self.info.log2(dy.logistic(rep)).value()
             present = {self._w2i[w if w in self._w2i else self._UNK]: True
                        for sent in article_Y for w in sent}
-            xent = sum([- on_lprobs[i] for i in present])
+            xent = sum([- on_lprobs[i] if on_lprobs[i] != float("-inf") else 0.0
+                        for i in present])
             avg_xent += xent / len(articles_X)
+
         return avg_xent
 
     def train(self, model_path, articles_X, articles_Y, dev_articles_X,
@@ -100,7 +105,10 @@ class WBagPredictor(Model):
             inds = [i for i in xrange(len(articles_Y))]
             random.shuffle(inds)
             avg_loss = 0.0
-            for i in inds:
+            for data_num, i in enumerate(inds):
+                if (data_num + 1) % 100 == 0:
+                    print data_num + 1,
+                    sys.stdout.flush()
                 loss = self.get_loss(articles_X[i], articles_Y[i])
                 avg_loss += loss.value() / len(inds)
                 loss.backward()
