@@ -80,8 +80,7 @@ class WBagPredictor(Model):
             on_lprobs = self.info.log2(dy.logistic(rep)).value()
             present = {self._w2i[w if w in self._w2i else self._UNK]: True
                        for sent in article_Y for w in sent}
-            xent = sum([- on_lprobs[i] if on_lprobs[i] != float("-inf") else 0.0
-                        for i in present])
+            xent = sum([- on_lprobs[i] for i in present])
             avg_xent += xent / len(articles_X)
 
         return avg_xent
