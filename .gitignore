@@ -4,6 +4,7 @@ tmp/*
 # Data
 data/pos/*
 data/ner/*
+data/semantics/*
 !data/pos/sample*
 !data/ner/sample*
 !data/ner/convert_bio.py

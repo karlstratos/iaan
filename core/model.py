@@ -239,6 +239,9 @@ class Model(object):
                                 self._i2jamo[i] = jamo
                                 self.jamo_count[jamo] = 1
 
+        if self._UNK in self._w2i:    # UNK added from text, delete from dict
+            del self._w2i[self._UNK]  # to add later.
+
         # Add the BUF word symbol.
         assert not self._BUF in self._w2i
         w_BUF_i = len(self._w2i)

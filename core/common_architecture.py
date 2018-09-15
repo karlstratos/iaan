@@ -171,6 +171,15 @@ class CommonArchitecture(object):
         return [dy.concatenate([outputs1[i], outputs2[i]]) for
                 i in xrange(len(outputs1))]
 
+    def get_hier_bilstm_avg(self, input_seqs, flstm1, blstm1, flstm2, blstm2,
+                            update_flag=True):
+        seqreps = []
+        for input_seq in input_seqs:
+            seqreps.append(dy.average(self.get_bilstm_all(input_seq, flstm1,
+                                                          blstm1, update_flag)))
+        return dy.average(self.get_bilstm_all(seqreps, flstm2, blstm2,
+                                              update_flag))
+
     def get_bilstm_single(self, inputs, lstm1, lstm2, update_flag=True):
         outputs1, outputs2 = self.run_bilstm(inputs, lstm1, lstm2, update_flag)
         return dy.concatenate([outputs1[-1], outputs2[0]])
