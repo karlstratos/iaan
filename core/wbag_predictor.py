@@ -1,6 +1,7 @@
 # Author: Karl Stratos (me@karlstratos.com)
 import dynet as dy
 import numpy as np
+import math
 import os
 import pickle
 import random
@@ -70,6 +71,7 @@ class WBagPredictor(Model):
 
     def test(self, articles_X, articles_Y):
         avg_xent = 0.0
+        log2zero = math.log(1e-16, 2)  # To avoid infinity
 
         for (article_X, article_Y) in zip(articles_X, articles_Y):
             dy.renew_cg()
@@ -80,7 +82,8 @@ class WBagPredictor(Model):
             on_lprobs = self.info.log2(dy.logistic(rep)).value()
             present = {self._w2i[w if w in self._w2i else self._UNK]: True
                        for sent in article_Y for w in sent}
-            xent = sum([- on_lprobs[i] for i in present])
+            xent = sum([- (on_lprobs[i] if on_lprobs[i] != float("-inf")
+                           else log2zero) for i in present])
             avg_xent += xent / len(articles_X)
 
         return avg_xent
